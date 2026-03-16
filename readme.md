@@ -11,7 +11,7 @@
 数据库选用 PostgreSQL 或 SQLite 存储任务数据；
 通过 JSON/MsgPack 完成前后端通信。
 ### 项目技术栈
-- 前端：Leptos(SSR模式)
+- 前端：Leptos(SSR/CSR模式)
 - 后端：salvo
 - 数据库：SQLx(SQLite) 
 - 通信协议：quic协议
