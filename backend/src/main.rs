@@ -1,6 +1,9 @@
 use salvo::oapi::extract::*;
 use salvo::prelude::*;
 
+mod models;
+use models::user;
+
 #[endpoint]
 async fn hello(name: QueryParam<String, false>) -> String {
     format!("Hello, {}!", name.as_deref().unwrap_or("World"))
@@ -9,6 +12,7 @@ async fn hello(name: QueryParam<String, false>) -> String {
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt().init();
+    let _name = user::get_user();
 
     let router = Router::new().push(Router::with_path("hello").get(hello));
 

@@ -1,0 +1,39 @@
+项目结构(后端)
+MyTodoApp-server/
+├── src/
+│   ├── main.rs
+│   ├── models/
+│   │   ├── user.rs
+│   │   ├── task.rs
+│   │   ├── team.rs
+│   │   ├── log.rs
+│   │   └── common.rs
+│   ├── handlers/          
+│   │   ├── user_handler.rs
+│   │   ├── task_handler.rs
+│   │   ├── team_handler.rs
+│   │   ├── dashboard_handler.rs
+│   │   └── log_handler.rs
+│   ├── services/          
+│   │   ├── user_service.rs
+│   │   ├── task_service.rs
+│   │   ├── team_service.rs
+│   │   ├── dashboard_service.rs
+│   │   └── log_service.rs
+│   ├── routes/            
+│   │   ├── user_routes.rs
+│   │   ├── task_routes.rs
+│   │   ├── team_routes.rs
+│   │   ├── dashboard_routes.rs
+│   │   └── log_routes.rs
+│   ├── db/                
+│   │   ├── pool.rs
+│   │   └── migrations.rs
+│   ├── middleware/        
+│   │   ├── auth.rs
+│   │   └── logging.rs
+│   └── utils/             
+│       ├── crypto.rs
+│       └── validator.rs
+├── Cargo.toml
+└── readme.md

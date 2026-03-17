@@ -1,4 +1,4 @@
-## todoManager——服务端
+## todoManager
 个人毕业设计仓库
 论文题目：
 基于 Rust语言 的内存安全高性能 To-Do 系统的设计与实现
