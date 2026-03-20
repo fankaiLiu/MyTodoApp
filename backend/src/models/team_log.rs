@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 */
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TeamLog {
+pub struct Log_TeamLog {
     pub log_id: u64,
     pub team_id: u64,
     pub operator_id: u64,           // 操作者ID

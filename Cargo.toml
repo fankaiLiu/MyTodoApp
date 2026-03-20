@@ -16,6 +16,7 @@ tokio-stream = "0.1.18"
 tracing = "0.1.44"
 tracing-subscriber = "0.3.22"
 
+# 前端依赖
 console_error_panic_hook = "0.1.7"
 leptos = { version = "0.8.17", features = ["csr"] }
 
@@ -23,3 +24,6 @@ leptos = { version = "0.8.17", features = ["csr"] }
 sonyflake = "0.4.0"
 # nulid = "0.10.1"
 chrono = "0.4.44"
+
+# 数据库
+sqlx = "0.8.6"

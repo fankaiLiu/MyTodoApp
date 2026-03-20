@@ -15,6 +15,9 @@
     sub_teams_name: 子团队名称列表，Vec<String>类型
     sub_teams_id: 子团队ID列表，雪花ID，Vec<u64>类型
     sub_team_description: 子团队描述，可选
+    新层级(Option)：组织（Organization）层级
+    用于管理组织下的团队，每个组织即为一个公司整体，或者集团。
+    如果时间允许，后续版本可以考虑添加组织层级。
 */
 
 use std::collections::HashSet;
@@ -33,20 +36,29 @@ pub struct Team {
     pub team_members: Vec<TeamMember>,
     // 团队创建时间，Unix时间戳
     pub team_create_time: i64,
-    // 团队描述，可选
-    pub team_description: Option<String>,
-    // 团队可见性，公开或私有
-    pub team_visibility: TeamVisibility,
-    // 团队总成员上限，u16类型(0~65535)
-    pub team_member_limit: u16,
     // 子团队ID列表，Vec<u64>类型
     pub sub_team_ids: Vec<u64>,
+    // 团队设置：包括团队描述、可见性、状态、头像、总成员上限
+    pub team_settings: Team_Settings,
+}
+
+// 团队设置结构体
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+pub struct Team_Settings {
+    // 团队描述，可选
+    pub team_description: Option<String>,
+    // 团队可见性，公开或私有/仅邀请
+    pub team_visibility: TeamVisibility,
     // 团队状态: 运行中或已关闭
     pub team_status: TeamStatus,
+    // 团队头像，可选
+    pub team_avatar: Option<String>,
+    // 团队总成员上限，u16类型(0~65535)
+    pub team_member_limit: u16,
 }
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-pub struct SubTeam {
+pub struct Sub_Team {
     // 子团队ID，雪花ID，全局唯一，u64类型
     pub sub_team_id: u64,
     // 子团队名称
