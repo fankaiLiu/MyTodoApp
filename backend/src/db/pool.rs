@@ -2,7 +2,6 @@
 PostgreSQL 数据库连接池
 */
 use sqlx::{Pool, Postgres, postgres::PgPoolOptions};
-use std::env;
 use std::time::Duration;
 
 pub type DbPool = Pool<Postgres>;

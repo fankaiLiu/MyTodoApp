@@ -46,3 +46,4 @@
 
 项目运行所需：
 Linux（ubuntu）
+PostgreSQL数据库：url="postgres://mytodoapp:mytodoapp@localhost:5432/mytodoapp_db"
