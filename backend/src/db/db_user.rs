@@ -238,6 +238,131 @@ impl DbUser {
             user_status,
         })
     }
+
+    /// 更新用户密码
+    pub async fn update_user_password(
+        pool: &PgPool,
+        user_id: u64,
+        new_password: &str,
+    ) -> Result<bool> {
+        let password_hash = utils_passwd::hash_password(new_password)?;
+
+        let result = sqlx::query("UPDATE users SET user_password = $1 WHERE user_id = $2")
+            .bind(&password_hash)
+            .bind(user_id as i64)
+            .execute(pool)
+            .await?;
+
+        let affected = result.rows_affected();
+        tracing::info!(
+            "更新用户密码: user_id = {}, affected = {}",
+            user_id,
+            affected
+        );
+        Ok(affected > 0)
+    }
+
+    /// 更新用户最后登录时间
+    pub async fn update_last_login_time(pool: &PgPool, user_id: u64) -> Result<bool> {
+        let login_time = chrono::Utc::now().timestamp();
+
+        let result = sqlx::query("UPDATE users SET user_last_login_time = $1 WHERE user_id = $2")
+            .bind(login_time)
+            .bind(user_id as i64)
+            .execute(pool)
+            .await?;
+
+        let affected = result.rows_affected();
+        tracing::info!(
+            "更新用户最后登录时间: user_id = {}, time = {}",
+            user_id,
+            login_time
+        );
+        Ok(affected > 0)
+    }
+
+    /// 获取用户团队列表
+    pub async fn get_user_teams(pool: &PgPool, user_id: u64) -> Result<Vec<i64>> {
+        let result = sqlx::query("SELECT user_teams FROM users WHERE user_id = $1")
+            .bind(user_id as i64)
+            .fetch_optional(pool)
+            .await?;
+
+        match result {
+            Some(row) => {
+                let user_teams: serde_json::Value = row.get("user_teams");
+                let teams: Vec<i64> = serde_json::from_value(user_teams).unwrap_or_default();
+                Ok(teams)
+            }
+            None => Ok(vec![]),
+        }
+    }
+
+    /// 添加用户到团队
+    pub async fn add_user_team(pool: &PgPool, user_id: u64, team_id: i64) -> Result<bool> {
+        let mut teams = Self::get_user_teams(pool, user_id).await?;
+
+        if teams.contains(&team_id) {
+            tracing::warn!(
+                "用户已在团队中: user_id = {}, team_id = {}",
+                user_id,
+                team_id
+            );
+            return Ok(false);
+        }
+
+        teams.push(team_id);
+        let teams_json = serde_json::to_value(&teams)?;
+
+        let result = sqlx::query("UPDATE users SET user_teams = $1 WHERE user_id = $2")
+            .bind(teams_json)
+            .bind(user_id as i64)
+            .execute(pool)
+            .await?;
+
+        let affected = result.rows_affected();
+        tracing::info!(
+            "添加用户到团队: user_id = {}, team_id = {}, affected = {}",
+            user_id,
+            team_id,
+            affected
+        );
+        Ok(affected > 0)
+    }
+
+    /// 从团队移除用户
+    pub async fn remove_user_team(pool: &PgPool, user_id: u64, team_id: i64) -> Result<bool> {
+        let mut teams = Self::get_user_teams(pool, user_id).await?;
+
+        let original_len = teams.len();
+        teams.retain(|&t| t != team_id);
+
+        if teams.len() == original_len {
+            tracing::warn!(
+                "用户不在团队中: user_id = {}, team_id = {}",
+                user_id,
+                team_id
+            );
+            return Ok(false);
+        }
+
+        let teams_json = serde_json::to_value(&teams)?;
+
+        let result = sqlx::query("UPDATE users SET user_teams = $1 WHERE user_id = $2")
+            .bind(teams_json)
+            .bind(user_id as i64)
+            .execute(pool)
+            .await?;
+
+        let affected = result.rows_affected();
+        tracing::info!(
+            "从团队移除用户: user_id = {}, team_id = {}, affected = {}",
+            user_id,
+            team_id,
+            affected
+        );
+        Ok(affected > 0)
+    }
 }
 
 #[cfg(test)]
@@ -332,5 +457,129 @@ mod tests {
         // 确认用户已删除
         let found = DbUser::get_user_by_id(&pool, user.user_id).await.unwrap();
         assert!(found.is_none());
+    }
+
+    #[tokio::test]
+    async fn test_user_password_and_login() {
+        let pool = crate::db::pool::create_pool().await.unwrap();
+
+        let user = DbUser::create_user(
+            &pool,
+            "test_password_user",
+            "OriginalPass123!",
+            "test_password@example.com",
+            "13900000001",
+        )
+        .await
+        .unwrap();
+
+        // 测试更新密码
+        let password_updated = DbUser::update_user_password(&pool, user.user_id, "NewPass456!")
+            .await
+            .unwrap();
+        assert!(password_updated);
+
+        // 验证旧密码无效
+        let user_data = DbUser::get_user_by_id(&pool, user.user_id)
+            .await
+            .unwrap()
+            .unwrap();
+        let verify_old = crate::utils::utils_passwd::verify_password(
+            "OriginalPass123!",
+            &user_data.user_password,
+        )
+        .unwrap();
+        assert!(!verify_old);
+
+        // 验证新密码有效
+        let verify_new =
+            crate::utils::utils_passwd::verify_password("NewPass456!", &user_data.user_password)
+                .unwrap();
+        assert!(verify_new);
+
+        // 测试更新最后登录时间
+        let login_updated = DbUser::update_last_login_time(&pool, user.user_id)
+            .await
+            .unwrap();
+        assert!(login_updated);
+
+        // 验证最后登录时间已更新
+        let user_after_login = DbUser::get_user_by_id(&pool, user.user_id)
+            .await
+            .unwrap()
+            .unwrap();
+        assert!(user_after_login.user_last_login_time.is_some());
+
+        // 清理
+        DbUser::delete_user(&pool, user.user_id).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_user_teams_operations() {
+        let pool = crate::db::pool::create_pool().await.unwrap();
+
+        let user = DbUser::create_user(
+            &pool,
+            "test_teams_user",
+            "TestPass123!",
+            "test_teams@example.com",
+            "13900000002",
+        )
+        .await
+        .unwrap();
+
+        // 初始团队列表为空
+        let initial_teams = DbUser::get_user_teams(&pool, user.user_id).await.unwrap();
+        assert!(initial_teams.is_empty());
+
+        // 添加用户到团队1
+        let add_result1 = DbUser::add_user_team(&pool, user.user_id, 1001)
+            .await
+            .unwrap();
+        assert!(add_result1);
+
+        // 验证团队列表
+        let teams1 = DbUser::get_user_teams(&pool, user.user_id).await.unwrap();
+        assert_eq!(teams1.len(), 1);
+        assert!(teams1.contains(&1001));
+
+        // 再次添加同一团队应返回false
+        let add_result_duplicate = DbUser::add_user_team(&pool, user.user_id, 1001)
+            .await
+            .unwrap();
+        assert!(!add_result_duplicate);
+
+        // 添加用户到团队2
+        let add_result2 = DbUser::add_user_team(&pool, user.user_id, 1002)
+            .await
+            .unwrap();
+        assert!(add_result2);
+
+        // 验证两个团队
+        let teams2 = DbUser::get_user_teams(&pool, user.user_id).await.unwrap();
+        assert_eq!(teams2.len(), 2);
+        assert!(teams2.contains(&1001));
+        assert!(teams2.contains(&1002));
+
+        // 从团队1移除用户
+        let remove_result1 = DbUser::remove_user_team(&pool, user.user_id, 1001)
+            .await
+            .unwrap();
+        assert!(remove_result1);
+
+        // 验证剩余团队
+        let teams3 = DbUser::get_user_teams(&pool, user.user_id).await.unwrap();
+        assert_eq!(teams3.len(), 1);
+        assert!(!teams3.contains(&1001));
+        assert!(teams3.contains(&1002));
+
+        // 尝试移除不存在的团队应返回false
+        let remove_nonexistent = DbUser::remove_user_team(&pool, user.user_id, 9999)
+            .await
+            .unwrap();
+        assert!(!remove_nonexistent);
+
+        // 清理
+        DbUser::delete_user(&pool, user.user_id).await.unwrap();
     }
 }
