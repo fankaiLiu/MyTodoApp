@@ -10,7 +10,7 @@
   - 密码强度验证
 
 #### 1.2 数据库操作层（核心基础）
-- [ ] **用户数据库操作** - 完善 `backend/src/db/db_user.rs`
+- [完成] **用户数据库操作** - 完善 `backend/src/db/db_user.rs`
   ```
   基础 CRUD 操作：
   1. create_user() - 创建用户
