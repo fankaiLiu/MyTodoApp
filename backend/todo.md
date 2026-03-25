@@ -1,10 +1,10 @@
 
 #### 1.1 工具函数层
-- [ ] **雪花 ID 生成器** - 创建 `backend/src/utils/id_generator.rs`
+- [初步完成] **雪花 ID 生成器** - 创建 `backend/src/utils/id_generator.rs`
   - 使用 Sonyflake 生成全局唯一 ID
   - 提供便捷的 ID 生成函数
   
-- [ ] **密码哈希工具** - 创建 `backend/src/utils/password.rs`
+- [初步完成] **密码哈希工具** - 创建 `backend/src/utils/utils_passwd.rs`
   - 使用 Argon2 或 bcrypt
   - 密码验证函数
   - 密码强度验证

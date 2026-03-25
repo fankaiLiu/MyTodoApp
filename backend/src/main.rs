@@ -7,6 +7,9 @@ mod db;
 use db::migrations::init_database;
 use db::pool::create_pool;
 
+// use crate::utils::id_generator::test_sonyflake_id;
+mod utils;
+
 #[endpoint]
 async fn hello(name: QueryParam<String, false>) -> String {
     // format!("Hello, {}!", name.as_deref().unwrap_or("World"))
@@ -21,6 +24,12 @@ async fn main() {
         tracing::error!("数据库初始化失败: {:?}", e);
         return;
     }
+
+    if let Err(e) = utils::id_generator::test_sonyflake_id() {
+        tracing::error!("测试sonflake id失败: {:?}", e);
+        return;
+    }
+
     let router = Router::new().push(Router::with_path("hello").get(hello));
 
     let doc = OpenApi::new("test api", "0.0.1").merge_router(&router);

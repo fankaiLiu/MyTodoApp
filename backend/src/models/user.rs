@@ -2,7 +2,7 @@
 // use salvo::prelude::*;
 // use nulid::Nulid;
 use serde::{Deserialize, Serialize};
-use sonyflake::Sonyflake;
+// use sonyflake::Sonyflake;
 
 use crate::models::user_settings::UserSettings;
 
@@ -19,7 +19,7 @@ use crate::models::user_settings::UserSettings;
     user_description: 用户描述(自我介绍/个人介绍)，可选
 */
 
-#[derive(Default, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct User {
     pub user_id: u64,
     pub user_username: String,

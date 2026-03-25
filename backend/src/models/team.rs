@@ -39,12 +39,12 @@ pub struct Team {
     // 子团队ID列表，Vec<u64>类型
     pub sub_team_ids: Vec<u64>,
     // 团队设置：包括团队描述、可见性、状态、头像、总成员上限
-    pub team_settings: Team_Settings,
+    pub team_settings: TeamSettings,
 }
 
 // 团队设置结构体
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-pub struct Team_Settings {
+pub struct TeamSettings {
     // 团队描述，可选
     pub team_description: Option<String>,
     // 团队可见性，公开或私有/仅邀请
@@ -58,7 +58,7 @@ pub struct Team_Settings {
 }
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-pub struct Sub_Team {
+pub struct SubTeam {
     // 子团队ID，雪花ID，全局唯一，u64类型
     pub sub_team_id: u64,
     // 子团队名称
