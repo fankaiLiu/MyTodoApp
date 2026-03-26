@@ -85,13 +85,13 @@ pub struct TeamMember {
     pub join_time: i64,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TeamVisibility {
     Public,  // 公开
     Private, // 私有 / 仅邀请 / 默认私有
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TeamStatus {
     Active, // 运行中 / 默认运行中
     Closed, // 已关闭
@@ -123,7 +123,7 @@ pub struct JoinRequest {
     pub review_message: Option<String>, // 审批回复
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RequestStatus {
     Pending,  // 待审批
     Approved, // 已通过
@@ -145,7 +145,7 @@ pub struct TeamInvite {
     pub status: InviteStatus, // 邀请状态
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum InviteStatus {
     Pending,  // 待审批
     Approved, // 已通过
