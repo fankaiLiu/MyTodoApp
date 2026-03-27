@@ -34,3 +34,8 @@ argon2 = "0.5.3"
 anyhow = "1.0.102"
 # indexeddb
 # idb = "0.6.5"
+
+regex-lite = "0.1"
+# 日志
+tracing-appender = "0.2"
+uuid = { version = "1", features = ["v4"] }

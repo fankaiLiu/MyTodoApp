@@ -1,13 +1,18 @@
 
 #### 1.1 工具函数层
-- [初步完成] **雪花 ID 生成器** - 创建 `backend/src/utils/id_generator.rs`
+- [完成] **雪花 ID 生成器** - 创建 `backend/src/utils/id_generator.rs`
   - 使用 Sonyflake 生成全局唯一 ID
   - 提供便捷的 ID 生成函数
   
-- [初步完成] **密码哈希工具** - 创建 `backend/src/utils/utils_passwd.rs`
-  - 使用 Argon2 或 bcrypt
+- [完成] **密码哈希工具** - 创建 `backend/src/utils/utils_passwd.rs`
+  - 使用 Argon2 
   - 密码验证函数
   - 密码强度验证
+
+- [完成] **数据验证工具** - 创建 `backend/src/utils/validator.rs`
+  - 请求参数验证
+  - 数据格式校验
+  - 自定义验证规则
 
 #### 1.2 数据库操作层（核心基础）
 - [完成] **用户数据库操作** - 完善 `backend/src/db/db_user.rs`
@@ -110,24 +115,73 @@
 
 #### 2.1 JWT 认证
 - [ ] **JWT 工具** - 创建 `backend/src/utils/jwt.rs`
-- Token 生成
-- Token 验证
-- Token 刷新
+  - Token 生成（登录时使用）
+  - Token 验证（中间件使用）
+  - [可选] Token 刷新（后续根据需求添加）
 
-#### 2.2 中间件
+#### 2.2 中间件（执行顺序：日志 → 认证 → 权限）
+- [ ] **日志中间件** - 创建 `backend/src/middleware/logging.rs`
+  - 使用 Salvo 内置 `Logger` 组件
+  - [可选] 自定义请求日志（耗时统计、请求ID追踪）
+
 - [ ] **认证中间件** - 创建 `backend/src/middleware/auth.rs`
-- 验证 JWT Token
-- 提取用户信息
+  - JWT Token 验证
+  - 用户信息提取
+  - 认证状态检查（设置 user_id 到 Depot）
 
 - [ ] **权限中间件** - 创建 `backend/src/middleware/permission.rs`
-- 检查用户权限
-- 检查团队权限
+  
+  ##### 2.2.3.1 角色定义
+  - 系统角色枚举 (Owner, Admin, Member)
+  - 团队成员角色枚举 (Owner, Admin, Member)
+  - 角色层级和权限判断
+  <!-- 后续方案：
+  是否可以给指定级别添加特定权限，团队创建者默认拥有最高权限，可以编辑其他级别拥有哪些权限，然后再指定成员的级别
+  级别类型(u8) 0~255，还可以给级别添加别称，方便区分
+  0：没有权限(默认最低权限)、255：所有权限(默认最高权限)
+  比如创建者可以指定 [1,3,5] 只能查看任务，不能创建+编辑任务，[2,4,6] 只能创建+编辑任务，就像军营中的工兵、炊事兵、通信兵一样
+   -->
+  
+  ##### 2.2.3.2 权限服务
+  - PermissionService 权限检查逻辑
+  - 资源所有权检查 (用户/任务/团队/子团队)
+  - 团队权限检查
+  
+  ##### 2.2.3.3 认证检查中间件
+  - require_auth - 检查用户登录状态
+  - 设置用户 ID 到 Depot
+  
+  ##### 2.2.3.4 团队成员检查中间件
+  - require_team_member - 检查团队成员资格
+  - 从路径参数获取 team_id
+  - 验证用户是否为团队成员
+  
+  ##### 2.2.3.5 管理员检查中间件
+  - require_team_admin - 检查团队管理权限
+  - 检查成员角色是否满足管理要求
+  
+  ##### 2.2.3.6 资源所有权检查中间件
+  - require_resource_owner - 检查资源操作权限
+  - 验证用户是否有权操作指定资源
 
 ---
 
 ### 第三阶段：用户 API（依赖第二阶段）
 
-#### 3.1 用户 API 端点
+#### 3.1 用户后端架构
+```
+HTTP 请求
+    ↓
+routes/user_routes.rs     (路由定义)
+    ↓
+handlers/user_handler.rs  (处理请求)
+    ↓
+services/user_service.rs  (业务逻辑)
+    ↓
+db/db_user.rs            (数据库操作)
+```
+
+#### 3.2 用户 API 端点
 - [ ] **注册接口** - `POST /api/users/register`
 - [ ] **登录接口** - `POST /api/users/login`
 - [ ] **获取用户信息** - `GET /api/users/{user_id}`
@@ -193,7 +247,20 @@
 
 ### 第六阶段：任务 API（依赖第三阶段） [无单元测试]
 
-#### 6.1 任务 API 端点
+#### 6.1 任务后端架构
+```
+HTTP 请求
+    ↓
+routes/task_routes.rs     (路由定义)
+    ↓
+handlers/task_handler.rs  (处理请求)
+    ↓
+services/task_service.rs  (业务逻辑)
+    ↓
+db/db_task.rs             (数据库操作)
+```
+
+#### 6.2 任务 API 端点
 - [ ] **创建任务** - `POST /api/tasks`
 - [ ] **获取任务详情** - `GET /api/tasks/{task_id}`
 - [ ] **获取任务列表** - `GET /api/tasks`
@@ -230,7 +297,20 @@
 
 ### 第八阶段：团队 API（依赖第三阶段） [无单元测试]
 
-#### 8.1 团队 API 端点
+#### 8.1 团队后端架构
+```
+HTTP 请求
+    ↓
+routes/team_routes.rs     (路由定义)
+    ↓
+handlers/team_handler.rs  (处理请求)
+    ↓
+services/team_service.rs  (业务逻辑)
+    ↓
+db/db_team.rs             (数据库操作)
+```
+
+#### 8.2 团队 API 端点
 - [ ] **创建团队** - `POST /api/teams`
 - [ ] **获取团队详情** - `GET /api/teams/{team_id}`
 - [ ] **获取团队列表** - `GET /api/teams`
@@ -333,11 +413,13 @@
 
 ### 第十四阶段：离线存储（可选，后期优化） [无单元测试]
 
-#### 14.1 离线存储前端[个人离线模式]
-- [ ] **IndexedDB 封装**
-- [ ] **本地数据存储**
-- [ ] **离线数据同步**
-- [ ] **冲突解决**
+#### 14.1 离线存储前端 [个人离线模式]
+离线模式下，只显示用户的个人任务，与在线模式中的任务数据完全隔离，不干扰团队数据。
+- [ ] **IndexedDB 封装** - 创建本地数据库
+- [ ] **本地数据存储** - 存储个人任务数据
+- [ ] **离线任务操作** - 创建/编辑/删除个人任务
+- [ ] **离线状态显示** - 显示当前是否为离线状态
+- [ ] **上线同步（可选）** - 联网后同步到服务器
 
 ---
 
