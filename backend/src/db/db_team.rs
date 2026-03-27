@@ -508,14 +508,16 @@ impl DbTeam {
         let sub_team_ids: serde_json::Value = row.get("sub_team_ids");
         let team_settings: serde_json::Value = row.get("team_settings");
 
-        let sub_team_ids: Vec<i64> = serde_json::from_value(sub_team_ids).unwrap_or_default();
-        let team_settings: TeamSettings = serde_json::from_value(team_settings).unwrap_or_default();
+        let sub_team_ids: Vec<i64> = serde_json::from_value(sub_team_ids)
+            .map_err(|e| anyhow::anyhow!("解析子团队ID失败: {}", e))?;
+        let team_settings: TeamSettings = serde_json::from_value(team_settings)
+            .map_err(|e| anyhow::anyhow!("解析团队设置失败: {}", e))?;
 
         Ok(Team {
             team_id: team_id as u64,
             team_name,
             team_leader_id: team_leader_id as u64,
-            team_members: vec![],
+            team_members: vec![], // 成员通过单独的查询获取，避免N+1查询问题
             team_create_time,
             sub_team_ids: sub_team_ids.into_iter().map(|v| v as u64).collect(),
             team_settings,
