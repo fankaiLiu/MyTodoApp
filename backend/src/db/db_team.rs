@@ -1,6 +1,5 @@
 use crate::models::team::{
-    JoinRequest, RequestStatus, Team, TeamInvite, TeamMember, TeamSettings, TeamStatus,
-    TeamVisibility,
+    JoinRequest, Member, RequestStatus, Team, TeamInvite, TeamSettings, TeamStatus, TeamVisibility,
 };
 use crate::utils::id_generator::generate_team_id;
 use anyhow::Result;
@@ -218,7 +217,7 @@ impl DbTeam {
         Ok(affected > 0)
     }
 
-    pub async fn get_team_members(pool: &PgPool, team_id: u64) -> Result<Vec<TeamMember>> {
+    pub async fn get_team_members(pool: &PgPool, team_id: u64) -> Result<Vec<Member>> {
         let result = sqlx::query(
             r#"
             SELECT user_id, level, join_time
@@ -237,10 +236,12 @@ impl DbTeam {
             let level: i32 = row.get("level");
             let join_time: i64 = row.get("join_time");
 
-            members.push(TeamMember {
+            members.push(Member {
                 user_id: user_id as u64,
                 level: level as u8,
                 join_time,
+                team_id: Some(team_id),
+                sub_team_id: None,
             });
         }
 

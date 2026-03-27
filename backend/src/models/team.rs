@@ -20,8 +20,6 @@
     如果时间允许，后续版本可以考虑添加组织层级。
 */
 
-use std::collections::HashSet;
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -32,8 +30,8 @@ pub struct Team {
     pub team_name: String,
     // 团队负责人ID，雪花ID，u64类型(user中user_id)
     pub team_leader_id: u64,
-    // 团队成员ID列表，雪花ID，Vec<TeamMember>类型
-    pub team_members: Vec<TeamMember>,
+    // 团队成员ID列表，雪花ID，Vec<Member>类型
+    pub team_members: Vec<Member>,
     // 团队创建时间，Unix时间戳
     pub team_create_time: i64,
     // 子团队ID列表，Vec<u64>类型
@@ -65,8 +63,8 @@ pub struct SubTeam {
     pub sub_team_name: String,
     // 子团队负责人ID，雪花ID，u64类型(user中user_id)
     pub sub_team_leader_id: u64,
-    // 子团队成员ID列表，雪花ID，HashSet<u64>类型
-    pub sub_team_members: HashSet<u64>,
+    // 子团队成员列表
+    pub sub_team_members: Vec<Member>,
     // 子团队创建时间，Unix时间戳
     pub sub_team_create_time: i64,
     // 子团队描述，可选
@@ -76,12 +74,22 @@ pub struct SubTeam {
 }
 
 // 团队成员结构体
+// #[derive(Default, Debug, Clone, Serialize, Deserialize)]
+// pub struct TeamMember {
+//     pub user_id: u64,
+//     // 团队成员等级
+//     pub level: u8,
+//     // 加入时间，Unix时间戳
+//     pub join_time: i64,
+// }
+
+// 统一成员结构体，适用于主团队和子团队
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-pub struct TeamMember {
+pub struct Member {
+    pub team_id: Option<u64>,
+    pub sub_team_id: Option<u64>,
     pub user_id: u64,
-    // 团队成员等级
     pub level: u8,
-    // 加入时间，Unix时间戳
     pub join_time: i64,
 }
 
