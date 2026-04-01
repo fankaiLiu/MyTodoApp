@@ -8,13 +8,21 @@ const TOKEN_KEY: &str = "todo_token";
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct UserProfile {
     pub user_id: u64,
+    #[serde(rename = "user_username")]
     pub username: String,
+    #[serde(rename = "user_email")]
     pub email: String,
+    #[serde(rename = "user_phone")]
     pub phone: String,
+    #[serde(rename = "user_avatar")]
     pub avatar: Option<String>,
+    #[serde(rename = "user_description")]
     pub description: Option<String>,
+    #[serde(rename = "user_reg_time")]
     pub reg_time: i64,
+    #[serde(rename = "user_last_login_time")]
     pub last_login_time: Option<i64>,
+    #[serde(rename = "user_teams")]
     pub team_ids: Vec<u64>,
 }
 

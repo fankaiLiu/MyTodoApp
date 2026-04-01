@@ -61,6 +61,8 @@ pub struct Team {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct TeamMember {
+    pub team_id: Option<u64>,
+    pub sub_team_id: Option<u64>,
     pub user_id: u64,
     pub level: u8,
     pub join_time: i64,
