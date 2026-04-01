@@ -2,7 +2,6 @@ use salvo::oapi::extract::*;
 use salvo::prelude::*;
 
 mod models;
-// use models::user;
 mod db;
 use db::migrations::init_database;
 use db::pool::create_pool;
@@ -10,12 +9,16 @@ use db::pool::create_pool;
 mod middleware;
 use middleware::logging::{logger, request_logger};
 
-// use crate::utils::id_generator::test_sonyflake_id;
 mod utils;
+
+mod handlers;
+mod routes;
+mod services;
+
+use routes::user_routes;
 
 #[endpoint]
 async fn hello(name: QueryParam<String, false>) -> String {
-    // format!("Hello, {}!", name.as_deref().unwrap_or("World"))
     format!("Hello, {}!", name.as_deref().unwrap_or("World"))
 }
 
@@ -33,7 +36,9 @@ async fn main() {
         return;
     }
 
-    let router = Router::new().push(Router::with_path("hello").get(hello));
+    let router = Router::new()
+        .push(Router::with_path("hello").get(hello))
+        .push(user_routes::user_router());
 
     let doc = OpenApi::new("test api", "0.0.1").merge_router(&router);
 
@@ -41,7 +46,6 @@ async fn main() {
         .unshift(doc.into_router("/api-doc/openapi.json"))
         .unshift(SwaggerUi::new("/api-doc/openapi.json").into_router("/swagger-ui"));
 
-    // let acceptor = TcpListener::new("0.0.0.0:8698").bind().await;
     let acceptor = TcpListener::new("localhost:8698").bind().await;
     Server::new(acceptor).serve(router).await;
 }

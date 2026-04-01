@@ -168,21 +168,21 @@ db/db_user.rs            (数据库操作)
 ```
 
 #### 3.2 用户 API 端点
-- [ ] **注册接口** - `POST /api/users/register`
-- [ ] **登录接口** - `POST /api/users/login`
-- [ ] **获取用户信息** - `GET /api/users/{user_id}`
-- [ ] **更新用户信息** - `PUT /api/users/{user_id}`
-- [ ] **修改密码** - `PUT /api/users/{user_id}/password`
-- [ ] **更新设置** - `PUT /api/users/{user_id}/settings`
-- [ ] **获取用户团队** - `GET /api/users/{user_id}/teams`
-- [ ] **获取用户日志** - `GET /api/users/{user_id}/logs`
+- [完成] **注册接口** - `POST /api/users/register`
+- [完成] **登录接口** - `POST /api/users/login`
+- [完成] **获取用户信息** - `GET /api/users/{user_id}`
+- [完成] **更新用户信息** - `PUT /api/users/{user_id}`
+- [完成] **修改密码** - `PUT /api/users/{user_id}/password`
+- [完成] **更新设置** - `PUT /api/users/{user_id}/settings`
+- [完成] **获取用户团队** - `GET /api/users/{user_id}/teams`
+- [完成] **获取用户日志** - `GET /api/users/{user_id}/logs`
 
 ---
 
 ### 第四阶段：前端基础（依赖第三阶段） [无单元测试]
 
 #### 4.1 基础组件
-- [ ] **UI 组件库** - 创建 `frontend/src/components/`
+- [完成] **UI 组件库** - 创建 `frontend/src/components/`
 - Button 组件
 - Input 组件
 - Form 组件
@@ -191,21 +191,21 @@ db/db_user.rs            (数据库操作)
 - Loading 组件
 
 #### 4.2 状态管理
-- [ ] **全局状态** - 创建 `frontend/src/store/`
+- [完成] **全局状态** - 创建 `frontend/src/store/`
 - 用户状态
 - 任务状态
 - 团队状态
 - 主题状态
 
 #### 4.3 API 客户端
-- [ ] **HTTP 客户端** - 创建 `frontend/src/api/`
+- [完成] **HTTP 客户端** - 创建 `frontend/src/api/`
 - 请求封装
 - 错误处理
 - Token 管理
 - 请求拦截器
 
 #### 4.4 路由配置
-- [ ] **路由设置** - 完善 `frontend/src/router.rs`
+- [完成] **路由设置** - 完善 `frontend/src/router.rs`
 - 登录页路由
 - 注册页路由
 - Dashboard 路由
@@ -463,9 +463,9 @@ db/db_team.rs             (数据库操作)
 ## 📝 进度跟踪
 
 ### 当前进度
-- [ ] 第一阶段：基础设施 (2/10)
-- [ ] 第二阶段：认证和授权 (0/4)
-- [ ] 第三阶段：用户 API (0/8)
+- [x] 第一阶段：基础设施 (10/10)
+- [x] 第二阶段：认证和授权 (4/4)
+- [x] 第三阶段：用户 API (8/8)
 - [ ] 第四阶段：前端基础 (0/16)
 - [ ] 第五阶段：前端用户界面 (0/7)
 - [ ] 第六阶段：任务 API (0/8)
@@ -481,10 +481,10 @@ db/db_team.rs             (数据库操作)
 
 ### 总体进度
 - **总任务数**: 123
-- **已完成**: 2
+- **已完成**: 22
 - **进行中**: 0
-- **待完成**: 121
-- **完成率**: 2%
+- **待完成**: 101
+- **完成率**: 18%
 
 ---
 

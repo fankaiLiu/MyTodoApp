@@ -19,6 +19,7 @@ tracing-subscriber = "0.3.22"
 # 前端依赖
 console_error_panic_hook = "0.1.7"
 leptos = { version = "0.8.17", features = ["csr"] }
+leptos_router = "0.8.12"
 
 # ferroid = "1.0.2"
 sonyflake = "0.4.0"
