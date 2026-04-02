@@ -4,4 +4,6 @@ pub mod form;
 pub mod input;
 pub mod loading;
 pub mod modal;
+pub mod search;
+pub mod task_card;
 pub mod theme_switcher;

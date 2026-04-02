@@ -261,11 +261,11 @@ db/db_task.rs             (数据库操作)
 ### 第七阶段：任务前端（依赖第六阶段） [无单元测试]
 
 #### 7.1 任务列表
-- [ ] **任务列表页面** - `frontend/src/pages/tasks.rs`
-- [ ] **任务卡片组件** - `frontend/src/components/task_card.rs`
-- [ ] **任务筛选器** - 状态、优先级、截止时间
-- [ ] **任务搜索** - 关键词搜索
-- [ ] **分页组件** - 分页加载
+- [完成] **任务列表页面** - `frontend/src/pages/tasks.rs`
+- [完成] **任务卡片组件** - `frontend/src/components/task_card.rs`
+- [完成] **任务筛选器** - 状态、优先级、截止时间
+- [完成] **任务搜索** - 关键词搜索
+- [完成] **分页组件** - 分页加载
 
 #### 7.2 任务创建/编辑
 - [ ] **任务表单** - `frontend/src/components/task_form.rs`
