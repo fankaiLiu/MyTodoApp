@@ -1,3 +1,4 @@
+#![allow(non_camel_case_types, non_snake_case, dead_code, unused_variables, unused_mut, unused_imports)]
 use salvo::oapi::extract::*;
 use salvo::prelude::*;
 
@@ -15,7 +16,7 @@ mod handlers;
 mod routes;
 mod services;
 
-use routes::user_routes;
+use routes::{user_routes, task_routes};
 
 #[endpoint]
 async fn hello(name: QueryParam<String, false>) -> String {
@@ -38,7 +39,8 @@ async fn main() {
 
     let router = Router::new()
         .push(Router::with_path("hello").get(hello))
-        .push(user_routes::user_router());
+        .push(user_routes::user_router())
+        .push(task_routes::task_router());
 
     let doc = OpenApi::new("test api", "0.0.1").merge_router(&router);
 

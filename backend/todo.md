@@ -247,14 +247,14 @@ db/db_task.rs             (数据库操作)
 ```
 
 #### 6.2 任务 API 端点
-- [ ] **创建任务** - `POST /api/tasks`
-- [ ] **获取任务详情** - `GET /api/tasks/{task_id}`
-- [ ] **获取任务列表** - `GET /api/tasks`
-- [ ] **更新任务** - `PUT /api/tasks/{task_id}`
-- [ ] **删除任务** - `DELETE /api/tasks/{task_id}`
-- [ ] **更新状态** - `PUT /api/tasks/{task_id}/status`
-- [ ] **更新优先级** - `PUT /api/tasks/{task_id}/priority`
-- [ ] **获取任务日志** - `GET /api/tasks/{task_id}/logs`
+- [完成] **创建任务** - `POST /api/tasks`
+- [完成] **获取任务详情** - `GET /api/tasks/{task_id}`
+- [完成] **获取任务列表** - `GET /api/tasks`
+- [完成] **更新任务** - `PUT /api/tasks/{task_id}`
+- [完成] **删除任务** - `DELETE /api/tasks/{task_id}`
+- [完成] **更新状态** - `PUT /api/tasks/{task_id}/status`
+- [完成] **更新优先级** - `PUT /api/tasks/{task_id}/priority`
+- [完成] **获取任务日志** - `GET /api/tasks/{task_id}/logs`
 
 ---
 
@@ -466,8 +466,8 @@ db/db_team.rs             (数据库操作)
 - [x] 第一阶段：基础设施 (10/10)
 - [x] 第二阶段：认证和授权 (4/4)
 - [x] 第三阶段：用户 API (8/8)
-- [ ] 第四阶段：前端基础 (0/16)
-- [ ] 第五阶段：前端用户界面 (0/7)
+- [x] 第四阶段：前端基础 (0/16)
+- [x] 第五阶段：前端用户界面 (0/7)
 - [ ] 第六阶段：任务 API (0/8)
 - [ ] 第七阶段：任务前端 (0/13)
 - [ ] 第八阶段：团队 API (0/14)
