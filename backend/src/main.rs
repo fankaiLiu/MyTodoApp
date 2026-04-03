@@ -1,9 +1,16 @@
-#![allow(non_camel_case_types, non_snake_case, dead_code, unused_variables, unused_mut, unused_imports)]
+#![allow(
+    non_camel_case_types,
+    non_snake_case,
+    dead_code,
+    unused_variables,
+    unused_mut,
+    unused_imports
+)]
 use salvo::oapi::extract::*;
 use salvo::prelude::*;
 
-mod models;
 mod db;
+mod models;
 use db::migrations::init_database;
 use db::pool::create_pool;
 
@@ -16,7 +23,7 @@ mod handlers;
 mod routes;
 mod services;
 
-use routes::{user_routes, task_routes};
+use routes::{task_routes, user_routes};
 
 #[endpoint]
 async fn hello(name: QueryParam<String, false>) -> String {
@@ -25,7 +32,7 @@ async fn hello(name: QueryParam<String, false>) -> String {
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt().init();
+    let _guard = utils::log::init_logger();
 
     if let Err(e) = run_database().await {
         tracing::error!("数据库初始化失败: {:?}", e);

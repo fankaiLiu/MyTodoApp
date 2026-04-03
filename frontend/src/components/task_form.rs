@@ -1,5 +1,6 @@
 use crate::components::modal::Modal;
 use crate::store::task_store::Task;
+use leptos::ev;
 use leptos::prelude::*;
 
 #[derive(Clone, PartialEq)]
@@ -69,32 +70,152 @@ pub fn TaskFormModal(
         "Save"
     };
 
+    // 响应式表单状态
+    let initial_data_clone = initial_data.clone();
+    let form_data = RwSignal::new(initial_data_clone);
+
+    // 当 initial_data 属性变化时更新表单数据（简单起见，仅首次渲染后更新）
+    Effect::new(move |_| {
+        form_data.set(initial_data.clone());
+    });
+
+    // 字段更新函数
+    let update_name = move |ev: ev::Event| {
+        let value = event_target_value(&ev);
+        form_data.update(|data| data.task_name = value);
+    };
+
+    let update_description = move |ev: ev::Event| {
+        let value = event_target_value(&ev);
+        form_data.update(|data| {
+            data.task_description = if value.is_empty() { None } else { Some(value) }
+        });
+    };
+
+    let update_priority = move |ev: ev::Event| {
+        let value = event_target_value(&ev);
+        if let Ok(priority) = value.parse::<u8>() {
+            form_data.update(|data| data.task_priority = priority);
+        }
+    };
+
+    // 关键词输入：逗号分隔的字符串
+    let update_keywords = move |ev: ev::Event| {
+        let value = event_target_value(&ev);
+        let keywords: Vec<String> = value
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect();
+        form_data.update(|data| data.task_keywords = keywords);
+    };
+
+    // 截止日期：将日期字符串转换为 i64 时间戳（UTC 午夜）
+    let update_deadline = move |ev: ev::Event| {
+        let value = event_target_value(&ev);
+        if value.is_empty() {
+            form_data.update(|data| data.task_deadline = None);
+        } else {
+            // 将 YYYY-MM-DD 转换为 Unix 时间戳（毫秒）
+            if let Ok(date) = chrono::NaiveDate::parse_from_str(&value, "%Y-%m-%d") {
+                let timestamp = date
+                    .and_hms_opt(0, 0, 0)
+                    .unwrap()
+                    .and_utc()
+                    .timestamp_millis();
+                form_data.update(|data| data.task_deadline = Some(timestamp));
+            }
+        }
+    };
+
+    // 负责人 ID 和团队 ID 暂不提供前端输入（由后端决定）
+    // 提交处理
+    let handle_submit = move |ev: ev::SubmitEvent| {
+        ev.prevent_default();
+        if let Some(callback) = on_submit {
+            callback.run((form_data.get_untracked(),));
+        }
+    };
+
+    // 取消处理
+    let handle_cancel = move |_| {
+        if let Some(callback) = on_close {
+            callback.run(());
+        }
+    };
+
     view! {
         <Modal open=MaybeSignal::Static(open) title={title.to_string()}>
-            <form class="form">
+            <form class="form" on:submit=handle_submit>
                 <div class="form-group">
                     <label class="form-label">Task Name</label>
-                    <input type="text" class="input-field" placeholder="Enter task name" />
+                    <input
+                        type="text"
+                        class="input-field"
+                        placeholder="Enter task name"
+                        prop:value=move || form_data.get().task_name
+                        on:input=update_name
+                    />
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Description</label>
-                    <textarea class="input-field task-description-input" placeholder="Enter task description"></textarea>
+                    <textarea
+                        class="input-field task-description-input"
+                        placeholder="Enter task description"
+                        prop:value=move || form_data.get().task_description.clone().unwrap_or_default()
+                        on:input=update_description
+                    />
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Priority</label>
-                    <input type="number" class="input-field" min="1" max="10" />
+                    <label class="form-label">Keywords (comma separated)</label>
+                    <input
+                        type="text"
+                        class="input-field"
+                        placeholder="e.g., urgent, bug, feature"
+                        prop:value=move || form_data.get().task_keywords.join(", ")
+                        on:input=update_keywords
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Priority (1-10)</label>
+                    <input
+                        type="number"
+                        class="input-field"
+                        min="1"
+                        max="10"
+                        prop:value=move || form_data.get().task_priority.to_string()
+                        on:input=update_priority
+                    />
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Deadline</label>
-                    <input type="date" class="input-field date-input" />
+                    <input
+                        type="date"
+                        class="input-field date-input"
+                        prop:value=move || {
+                            form_data.get().task_deadline.map(|ts| {
+                                // 将毫秒时间戳转换为 YYYY‑MM‑DD 格式
+                                let dt = chrono::DateTime::from_timestamp_millis(ts)
+                                    .unwrap_or_default()
+                                    .date_naive();
+                                dt.format("%Y-%m-%d").to_string()
+                            }).unwrap_or_default()
+                        }
+                        on:input=update_deadline
+                    />
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary btn-md">Cancel</button>
-                    <button type="submit" class="btn btn-primary btn-md">{submit_text}</button>
+                    <button type="button" class="btn btn-secondary btn-md" on:click=handle_cancel>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-md">
+                        {submit_text}
+                    </button>
                 </div>
             </form>
         </Modal>
