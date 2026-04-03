@@ -141,8 +141,25 @@ pub async fn list_tasks(depot: &mut Depot, req: &mut Request, res: &mut Response
 }
 
 #[endpoint]
-pub async fn update_task(task_id: PathParam<u64>, req: &mut Request, res: &mut Response) {
+pub async fn update_task(
+    task_id: PathParam<u64>,
+    req: &mut Request,
+    depot: &mut Depot,
+    res: &mut Response,
+) {
     let task_id: u64 = task_id.into_inner();
+
+    let user_id = match depot.get::<i64>("user_id").ok() {
+        Some(id) => *id as u64,
+        None => {
+            res.status_code(StatusCode::UNAUTHORIZED);
+            res.render(Json(serde_json::json!({
+                "error": "Unauthorized",
+                "message": "User not authenticated"
+            })));
+            return;
+        }
+    };
 
     let request: UpdateTaskRequest = match req.parse_json().await {
         Ok(req) => req,
@@ -167,6 +184,34 @@ pub async fn update_task(task_id: PathParam<u64>, req: &mut Request, res: &mut R
             return;
         }
     };
+
+    match TaskService::get_task_by_id(&pool, task_id).await {
+        Ok(Some(task)) => {
+            if task.task_leader_id != user_id {
+                res.status_code(StatusCode::FORBIDDEN);
+                res.render(Json(serde_json::json!({
+                    "error": "Forbidden",
+                    "message": "You don't have permission to update this task"
+                })));
+                return;
+            }
+        }
+        Ok(None) => {
+            res.status_code(StatusCode::NOT_FOUND);
+            res.render(Json(serde_json::json!({
+                "error": "Task not found"
+            })));
+            return;
+        }
+        Err(e) => {
+            res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+            res.render(Json(serde_json::json!({
+                "error": "Failed to fetch task",
+                "message": e.to_string()
+            })));
+            return;
+        }
+    }
 
     match TaskService::update_task(&pool, task_id, request).await {
         Ok(Some(task)) => {
@@ -193,8 +238,20 @@ pub async fn update_task(task_id: PathParam<u64>, req: &mut Request, res: &mut R
 }
 
 #[endpoint]
-pub async fn delete_task(task_id: PathParam<u64>, res: &mut Response) {
+pub async fn delete_task(task_id: PathParam<u64>, depot: &mut Depot, res: &mut Response) {
     let task_id: u64 = task_id.into_inner();
+
+    let user_id = match depot.get::<i64>("user_id").ok() {
+        Some(id) => *id as u64,
+        None => {
+            res.status_code(StatusCode::UNAUTHORIZED);
+            res.render(Json(serde_json::json!({
+                "error": "Unauthorized",
+                "message": "User not authenticated"
+            })));
+            return;
+        }
+    };
 
     let pool = match create_pool().await {
         Ok(pool) => pool,
@@ -207,6 +264,34 @@ pub async fn delete_task(task_id: PathParam<u64>, res: &mut Response) {
             return;
         }
     };
+
+    match TaskService::get_task_by_id(&pool, task_id).await {
+        Ok(Some(task)) => {
+            if task.task_leader_id != user_id {
+                res.status_code(StatusCode::FORBIDDEN);
+                res.render(Json(serde_json::json!({
+                    "error": "Forbidden",
+                    "message": "You don't have permission to delete this task"
+                })));
+                return;
+            }
+        }
+        Ok(None) => {
+            res.status_code(StatusCode::NOT_FOUND);
+            res.render(Json(serde_json::json!({
+                "error": "Task not found"
+            })));
+            return;
+        }
+        Err(e) => {
+            res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+            res.render(Json(serde_json::json!({
+                "error": "Failed to fetch task",
+                "message": e.to_string()
+            })));
+            return;
+        }
+    }
 
     match TaskService::delete_task(&pool, task_id).await {
         Ok(true) => {
@@ -232,8 +317,25 @@ pub async fn delete_task(task_id: PathParam<u64>, res: &mut Response) {
 }
 
 #[endpoint]
-pub async fn update_task_status(task_id: PathParam<u64>, req: &mut Request, res: &mut Response) {
+pub async fn update_task_status(
+    task_id: PathParam<u64>,
+    req: &mut Request,
+    depot: &mut Depot,
+    res: &mut Response,
+) {
     let task_id: u64 = task_id.into_inner();
+
+    let user_id = match depot.get::<i64>("user_id").ok() {
+        Some(id) => *id as u64,
+        None => {
+            res.status_code(StatusCode::UNAUTHORIZED);
+            res.render(Json(serde_json::json!({
+                "error": "Unauthorized",
+                "message": "User not authenticated"
+            })));
+            return;
+        }
+    };
 
     let request: UpdateTaskStatusRequest = match req.parse_json().await {
         Ok(req) => req,
@@ -258,6 +360,34 @@ pub async fn update_task_status(task_id: PathParam<u64>, req: &mut Request, res:
             return;
         }
     };
+
+    match TaskService::get_task_by_id(&pool, task_id).await {
+        Ok(Some(task)) => {
+            if task.task_leader_id != user_id {
+                res.status_code(StatusCode::FORBIDDEN);
+                res.render(Json(serde_json::json!({
+                    "error": "Forbidden",
+                    "message": "You don't have permission to update this task status"
+                })));
+                return;
+            }
+        }
+        Ok(None) => {
+            res.status_code(StatusCode::NOT_FOUND);
+            res.render(Json(serde_json::json!({
+                "error": "Task not found"
+            })));
+            return;
+        }
+        Err(e) => {
+            res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+            res.render(Json(serde_json::json!({
+                "error": "Failed to fetch task",
+                "message": e.to_string()
+            })));
+            return;
+        }
+    }
 
     match TaskService::update_task_status(&pool, task_id, request.task_status).await {
         Ok(Some(task)) => {
@@ -284,8 +414,25 @@ pub async fn update_task_status(task_id: PathParam<u64>, req: &mut Request, res:
 }
 
 #[endpoint]
-pub async fn update_task_priority(task_id: PathParam<u64>, req: &mut Request, res: &mut Response) {
+pub async fn update_task_priority(
+    task_id: PathParam<u64>,
+    req: &mut Request,
+    depot: &mut Depot,
+    res: &mut Response,
+) {
     let task_id: u64 = task_id.into_inner();
+
+    let user_id = match depot.get::<i64>("user_id").ok() {
+        Some(id) => *id as u64,
+        None => {
+            res.status_code(StatusCode::UNAUTHORIZED);
+            res.render(Json(serde_json::json!({
+                "error": "Unauthorized",
+                "message": "User not authenticated"
+            })));
+            return;
+        }
+    };
 
     let request: UpdateTaskPriorityRequest = match req.parse_json().await {
         Ok(req) => req,
@@ -310,6 +457,34 @@ pub async fn update_task_priority(task_id: PathParam<u64>, req: &mut Request, re
             return;
         }
     };
+
+    match TaskService::get_task_by_id(&pool, task_id).await {
+        Ok(Some(task)) => {
+            if task.task_leader_id != user_id {
+                res.status_code(StatusCode::FORBIDDEN);
+                res.render(Json(serde_json::json!({
+                    "error": "Forbidden",
+                    "message": "You don't have permission to update this task priority"
+                })));
+                return;
+            }
+        }
+        Ok(None) => {
+            res.status_code(StatusCode::NOT_FOUND);
+            res.render(Json(serde_json::json!({
+                "error": "Task not found"
+            })));
+            return;
+        }
+        Err(e) => {
+            res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+            res.render(Json(serde_json::json!({
+                "error": "Failed to fetch task",
+                "message": e.to_string()
+            })));
+            return;
+        }
+    }
 
     match TaskService::update_task_priority(&pool, task_id, request.task_priority).await {
         Ok(Some(task)) => {

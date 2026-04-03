@@ -118,11 +118,7 @@ pub fn TaskFormModal(
         } else {
             // 将 YYYY-MM-DD 转换为 Unix 时间戳（毫秒）
             if let Ok(date) = chrono::NaiveDate::parse_from_str(&value, "%Y-%m-%d") {
-                let timestamp = date
-                    .and_hms_opt(0, 0, 0)
-                    .unwrap()
-                    .and_utc()
-                    .timestamp_millis();
+                let timestamp = date.and_hms_opt(0, 0, 0).unwrap().and_utc().timestamp();
                 form_data.update(|data| data.task_deadline = Some(timestamp));
             }
         }
@@ -199,7 +195,7 @@ pub fn TaskFormModal(
                         prop:value=move || {
                             form_data.get().task_deadline.map(|ts| {
                                 // 将毫秒时间戳转换为 YYYY‑MM‑DD 格式
-                                let dt = chrono::DateTime::from_timestamp_millis(ts)
+                                let dt = chrono::DateTime::from_timestamp(ts,0)
                                     .unwrap_or_default()
                                     .date_naive();
                                 dt.format("%Y-%m-%d").to_string()
